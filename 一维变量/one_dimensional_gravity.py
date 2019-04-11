@@ -1,71 +1,91 @@
 from matplotlib import pyplot as plt
 import numpy as np
 from scipy.interpolate import spline
+class one_dimensional_gravity():
 
-def text_save(filename,data1,data2):
-    file=open(filename,"w")
-    for i in range(len(data1)):
-        s1=str(data1[i])
-        s2=str(data2[i])
-        file.write(s1)
-        file.write('\t')
-        file.write(s2)
-        file.write('\n')
-    file.close()
+    def __init__(self,anormal_h,anormal_r,residual_density,range_x,filename):
+        self.anormal_h=anormal_h
+        self.anormal_r=anormal_r
+        self.residual_density=residual_density
+        self.range_x=range_x
+        self.quality=6.67e-11*4.0/3*3.1415926*(self.anormal_r**3)*self.residual_density
+        self.filename=filename
 
-
-def Drafting(X,Y):#制图显示
-    T = np.array(X)
-    power = np.array(Y)
-    xnew = np.linspace(T.min(),T.max(),300) 
-    power_smooth = spline(T,power,xnew)
-    plt.plot(xnew,power_smooth)
-    plt.show()
-
-
-
-def Anormal(X):#y=0,z=0
-    anormal_h=200
-    g=[]
-    for x in X:
-        g.append((k_m*anormal_h)/(np.sqrt(x**2+anormal_h**2))**3)
-    text_save("E:\\python\\data1\\Anormal_g.txt",X,g)
-    Drafting(X,g)
-
-def Deflector_xz(X):#y=0,z=0
-    anormal_h=200
-    v=[]
-    for x in X:
-        v.append(-3*k_m*anormal_h*x/((np.sqrt(x**2+anormal_h**2))**5))
-    text_save("E:\\python\\data1\\V_xz.txt",X,v)
-    Drafting(X,v)
+    def text_save(self,data_y):
+        file=open(self.filename,"w")
+        for i in range(len(self.range_x)):
+            s1=str(self.range_x[i])
+            s2=str(data_y[i])
+            file.write(s1)
+            file.write('\t')
+            file.write(s2)
+            file.write('\n')
+        file.close()
 
 
-def Deflector_zz(X):#y=0,z=0
-    anormal_h=200
-    v=[]
-    for x in X:
-        v.append(k_m*(2*anormal_h*anormal_h-x**2)/((np.sqrt(x**2+anormal_h**2))**5))
-    text_save("E:\\python\\data1\\V_zz.txt",X,v)
-    Drafting(X,v)
+    def Deflector_xy(self):
+        v=[]
+        for x in self.range_x:
+            v.append(3*x/((np.sqrt(x**2+1+self.anormal_h**2))**5))
+        self.Drafting(v)
 
+    def Deflector_xy_save(self):
+        v=[]
+        for x in self.range_x:
+            v.append(3*x/((np.sqrt(x**2+1+self.anormal_h**2))**5))
+        self.text_save(self.filename,v)   
+        self.Drafting(v)
 
-def Deflector_xy(X):#y=1,z=0
-    anormal_h=200
-    v=[]
-    for x in X:
-        v.append(3*x/((np.sqrt(x**2+1+anormal_h**2))**5))
-    text_save("E:\\python\\data1\\V_xy.txt",X,v)
-    Drafting(X,v)
+    def Deflector_xz(self):
+        v=[]
+        for x in self.range_x:
+            v.append(-3*self.quality*self.anormal_h*x/((np.sqrt(x**2+self.anormal_h**2))**5))
+        self.Drafting(v)
 
-density_def=100
-anormal_r=20
-anormal_h=200
-quality_def=4.0/3*3.1415926*(anormal_r**3)*density_def
-k_m=6.67e-11*quality_def
-X = np.arange(-300, 300, 1)
+    def Deflector_xz_save(self):
+        v=[]
+        for x in self.range_x:
+            v.append(-3*self.quality*self.anormal_h*x/((np.sqrt(x**2+self.anormal_h**2))**5))
+        self.text_save(self.filename,v)
+        self.Drafting(v)
 
-Anormal(X)
-Deflector_xy(X)
-Deflector_xz(X)
-Deflector_zz(X)
+    def Deflector_zz(self):#y=0,z=0
+        v=[]
+        for x in self.range_x:
+            v.append(self.quality*(2*self.anormal_h*self.anormal_h-x**2)/((np.sqrt(x**2+self.anormal_h**2))**5))
+        self.Drafting(v)
+
+    def Deflector_zz_save(self):#y=0,z=0
+        v=[]
+        for x in self.range_x:
+            v.append(self.quality*(2*self.anormal_h*self.anormal_h-x**2)/((np.sqrt(x**2+self.anormal_h**2))**5))
+        self.text_save(self.filename,v)
+        self.Drafting(v)
+
+    def Anormal(self):#y=0,z=0
+        g=[]
+        for x in self.range_x:
+            g.append((self.quality*self.anormal_h)/(np.sqrt(x**2+self.anormal_h**2))**3)
+        self.Drafting(g)
+
+    def Anormal_save(self):#y=0,z=0
+        g=[]
+        for x in self.range_x:
+            g.append((self.quality*self.anormal_h)/(np.sqrt(x**2+self.anormal_h**2))**3)
+        self.text_save(self.filename,g)
+        self.Drafting(g)
+
+    def Drafting(self,Y):
+        T = np.array(self.range_x)
+        power = np.array(Y)
+        xnew = np.linspace(T.min(),T.max(),300) 
+        power_smooth = spline(T,power,xnew)
+        plt.plot(xnew,power_smooth)
+        plt.show()
+
+if __name__ == "__main__":
+    one_dimensional_gravity=one_dimensional_gravity(200,20,100,np.arange(-300, 300, 1),"文件")
+    one_dimensional_gravity.Deflector_xz()
+    one_dimensional_gravity.Deflector_zz()
+    one_dimensional_gravity.Deflector_xy()
+    one_dimensional_gravity.Anormal()
